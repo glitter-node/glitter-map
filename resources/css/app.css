@@ -1,0 +1,243 @@
+@import "leaflet/dist/leaflet.css";
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+:root,
+[data-theme='light'] {
+    --bg: #f8f9fa;
+    --surface: #ffffff;
+    --surface-strong: #ffffff;
+    --surface-muted: #ffffff;
+    --text: #111827;
+    --muted-text: #4b5563;
+    --muted-text-subtle: #9ca3af;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --input-border: #d1d5db;
+    --accent: #f97316;
+    --accent-hover: #ea580c;
+    --accent-contrast: #111111;
+    --focus-ring: rgba(249, 115, 22, 0.4);
+    --shell-glow: rgba(249, 115, 22, 0.02);
+    --shell-start: #f8f9fa;
+    --shell-end: #ffffff;
+    --panel-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='dim'] {
+    --bg: #181513;
+    --surface: #24201e;
+    --surface-strong: #312c2a;
+    --surface-muted: #2a2523;
+    --text: #e7e5e4;
+    --muted-text: #cfc7c2;
+    --muted-text-subtle: #a8a29e;
+    --border: rgba(245, 245, 244, 0.12);
+    --border-strong: rgba(245, 245, 244, 0.16);
+    --accent: #f59e57;
+    --accent-hover: #f8b374;
+    --accent-contrast: #18181b;
+    --focus-ring: rgba(245, 158, 87, 0.26);
+    --shell-glow: rgba(245, 158, 87, 0.045);
+    --shell-start: #2a2523;
+    --shell-end: #181513;
+    --panel-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+}
+
+[data-theme='dark'] {
+    --bg: #0c0a09;
+    --surface: #1c1917;
+    --surface-strong: #292524;
+    --surface-muted: #1f1a18;
+    --text: #f9fafb;
+    --muted-text: #d1d5db;
+    --muted-text-subtle: #9ca3af;
+    --border: rgba(245, 245, 244, 0.14);
+    --border-strong: rgba(245, 245, 244, 0.22);
+    --accent: #f97316;
+    --accent-hover: #fb923c;
+    --accent-contrast: #ffffff;
+    --focus-ring: rgba(251, 146, 60, 0.42);
+    --shell-glow: rgba(249, 115, 22, 0.12);
+    --shell-start: #1c1917;
+    --shell-end: #0c0a09;
+    --panel-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+@layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+
+    body {
+        @apply antialiased;
+        background-color: var(--bg);
+        color: var(--text);
+        transition:
+            background-color 250ms ease,
+            color 250ms ease;
+    }
+}
+
+@layer components {
+    .shell {
+        @apply min-h-screen;
+        background:
+            radial-gradient(circle at top, var(--shell-glow), transparent 30%),
+            linear-gradient(180deg, var(--shell-start) 0%, var(--shell-end) 100%);
+        transition: background 250ms ease;
+    }
+
+    .panel {
+        @apply rounded-3xl backdrop-blur;
+        border: 1px solid var(--border);
+        background-color: var(--surface);
+        box-shadow: var(--panel-shadow);
+        transition:
+            background-color 250ms ease,
+            border-color 250ms ease,
+            color 250ms ease;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2;
+        background-color: var(--accent);
+        color: var(--accent-contrast);
+        --tw-ring-color: var(--focus-ring);
+        --tw-ring-offset-color: var(--bg);
+        transition:
+            background-color 250ms ease,
+            border-color 250ms ease,
+            color 250ms ease;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--accent-hover);
+    }
+
+    .btn-secondary {
+        @apply inline-flex items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2;
+        border: 1px solid var(--border-strong, var(--border));
+        background-color: var(--surface);
+        color: var(--text);
+        --tw-ring-color: var(--focus-ring);
+        --tw-ring-offset-color: var(--bg);
+        transition:
+            background-color 250ms ease,
+            border-color 250ms ease,
+            color 250ms ease;
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--surface);
+        border-color: var(--accent);
+    }
+
+    .input {
+        @apply block w-full rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2;
+        border: 1px solid var(--input-border, var(--border));
+        background-color: var(--surface-muted);
+        color: var(--text);
+        --tw-ring-color: var(--focus-ring);
+        transition:
+            background-color 250ms ease,
+            border-color 250ms ease,
+            color 250ms ease;
+    }
+
+    .input::placeholder {
+        color: var(--muted-text-subtle, var(--muted-text));
+    }
+
+    .input:focus {
+        border-color: var(--accent);
+    }
+
+    .textarea {
+        @apply block min-h-32 w-full resize-y rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2;
+        border: 1px solid var(--input-border, var(--border));
+        background-color: var(--surface-muted);
+        color: var(--text);
+        --tw-ring-color: var(--focus-ring);
+        transition:
+            background-color 250ms ease,
+            border-color 250ms ease,
+            color 250ms ease;
+    }
+
+    .textarea::placeholder {
+        color: var(--muted-text-subtle, var(--muted-text));
+    }
+
+    .textarea:focus {
+        border-color: var(--accent);
+    }
+
+    .label {
+        @apply mb-2 block text-sm font-medium;
+        color: var(--muted-text);
+        transition: color 250ms ease;
+    }
+
+    .badge {
+        @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em];
+        transition:
+            background-color 250ms ease,
+            border-color 250ms ease,
+            color 250ms ease;
+    }
+}
+
+@layer utilities {
+    [data-theme='light'] .text-white {
+        color: #111827 !important;
+    }
+
+    [data-theme='light'] .text-stone-300 {
+        color: #4b5563 !important;
+    }
+
+    [data-theme='light'] .text-stone-400,
+    [data-theme='light'] .text-stone-500 {
+        color: #9ca3af !important;
+    }
+
+    [data-theme='light'] .text-orange-200,
+    [data-theme='light'] .text-orange-300\/80 {
+        color: #c2410c !important;
+    }
+
+    [data-theme='light'] .text-amber-300 {
+        color: #d97706 !important;
+    }
+
+    [data-theme='light'] .bg-orange-400\/15 {
+        background-color: rgba(249, 115, 22, 0.14) !important;
+    }
+
+    [data-theme='light'] .bg-emerald-400\/15 {
+        background-color: rgba(16, 185, 129, 0.16) !important;
+    }
+
+    [data-theme='light'] .text-emerald-200 {
+        color: #047857 !important;
+    }
+
+    [data-theme='light'] .bg-stone-900 {
+        background-color: #f3f4f6 !important;
+    }
+
+    [data-theme='light'] .border-white\/10,
+    [data-theme='light'] .border-white\/15 {
+        border-color: #d1d5db !important;
+    }
+}
