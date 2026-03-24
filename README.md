@@ -74,6 +74,7 @@ php artisan storage:link
 
 ## Environment
 
+```
 APP_NAME=
 APP_ENV=
 APP_DEBUG=
@@ -135,6 +136,7 @@ MAIL_FROM_NAME=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URI=
+```
 
 ## Running Locally
 
