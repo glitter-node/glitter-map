@@ -21,11 +21,10 @@ class GeocodeRestaurant implements ShouldQueue
 
     public int $timeout = 20;
 
-    public bool $afterCommit = true;
-
     public function __construct(public int $restaurantId)
     {
         $this->onQueue('geocoding');
+        $this->afterCommit();
     }
 
     public function handle(RestaurantGeocodingService $geocodingService): void
