@@ -29,7 +29,7 @@
             <label for="name" class="label">Name</label>
             <input id="name" name="name" type="text" class="input" value="{{ old('name', $restaurant->name) }}" required maxlength="255">
             @error('name')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
@@ -37,7 +37,7 @@
             <label for="address" class="label">Address</label>
             <input id="address" name="address" type="text" class="input" value="{{ old('address', $restaurant->address) }}" required maxlength="255">
             @error('address')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
@@ -49,19 +49,19 @@
                 @endforeach
             </select>
             @error('category')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
         <div x-data="ratingInput(@js((float) old('rating', $restaurant->rating ?: 3)))">
             <label class="label">Rating</label>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-2 sm:p-4">
+            <div class="surface-subtle rounded-2xl p-2 sm:p-4">
                 <div class="flex items-center gap-1">
                     <template x-for="star in 5" :key="star">
                         <button
                             type="button"
                             class="text-lg sm:text-2xl transition"
-                            :class="(hover || rating) >= star ? 'text-amber-300' : 'text-stone-700'"
+                            :class="(hover || rating) >= star ? 'rating-active' : 'rating-inactive'"
                             @mouseenter="hover = star"
                             @mouseleave="hover = 0"
                             @click="setRating(star)"
@@ -69,14 +69,14 @@
                         >★</button>
                     </template>
                 </div>
-                <div class="mt-3 flex items-center justify-between text-sm text-stone-400">
+                <div class="text-body mt-3 flex items-center justify-between text-sm">
                     <span>Tap to rate</span>
                     <span x-text="Number(rating).toFixed(1)"></span>
                 </div>
                 <input type="hidden" name="rating" :value="Number(rating).toFixed(1)">
             </div>
             @error('rating')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
@@ -91,7 +91,7 @@
                 required
             >
             @error('visited_at')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
@@ -99,7 +99,7 @@
             <label for="memo" class="label">Memo</label>
             <textarea id="memo" name="memo" class="textarea">{{ old('memo', $restaurant->memo) }}</textarea>
             @error('memo')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
@@ -109,23 +109,23 @@
         >
             <div class="mb-2 flex items-center justify-between gap-3">
                 <label class="label mb-0">Location</label>
-                <span class="text-xs uppercase tracking-[0.2em] text-stone-500" x-text="latitude && longitude ? `${Number(latitude).toFixed(5)}, ${Number(longitude).toFixed(5)}` : 'No location selected'"></span>
+                <span class="text-muted text-xs uppercase tracking-[0.2em]" x-text="latitude && longitude ? `${Number(latitude).toFixed(5)}, ${Number(longitude).toFixed(5)}` : 'No location selected'"></span>
             </div>
 
             <div
                 id="restaurant-form-map"
-                class="h-72 overflow-hidden rounded-3xl border border-white/10"
+                class="map-frame h-72 overflow-hidden rounded-3xl"
                 data-map-config='@json($formMapConfig)'
             ></div>
 
             <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-stone-300">
-                    <p class="text-xs uppercase tracking-[0.2em] text-stone-500">Latitude</p>
-                    <p class="mt-2 font-semibold text-white" x-text="latitude ? Number(latitude).toFixed(7) : 'Not selected'"></p>
+                <div class="surface-subtle text-body rounded-2xl px-4 py-3 text-sm">
+                    <p class="text-muted text-xs uppercase tracking-[0.2em]">Latitude</p>
+                    <p class="text-display mt-2 font-semibold" x-text="latitude ? Number(latitude).toFixed(7) : 'Not selected'"></p>
                 </div>
-                <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-stone-300">
-                    <p class="text-xs uppercase tracking-[0.2em] text-stone-500">Longitude</p>
-                    <p class="mt-2 font-semibold text-white" x-text="longitude ? Number(longitude).toFixed(7) : 'Not selected'"></p>
+                <div class="surface-subtle text-body rounded-2xl px-4 py-3 text-sm">
+                    <p class="text-muted text-xs uppercase tracking-[0.2em]">Longitude</p>
+                    <p class="text-display mt-2 font-semibold" x-text="longitude ? Number(longitude).toFixed(7) : 'Not selected'"></p>
                 </div>
             </div>
 
@@ -133,10 +133,10 @@
             <input id="longitude" name="longitude" type="hidden" x-model="longitude">
 
             @error('latitude')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
             @enderror
             @error('longitude')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
@@ -144,23 +144,23 @@
             <label for="image" class="label">Image</label>
             <input id="image" name="image" type="file" class="input px-3 py-2.5 file:mr-4 file:rounded-full file:border-0 file:bg-orange-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-stone-950">
             @if ($restaurant->image_path)
-                <div class="mt-3 overflow-hidden rounded-2xl border border-white/10">
+                <div class="theme-border mt-3 overflow-hidden rounded-2xl border">
                     <img src="{{ asset('storage/' . $restaurant->image_path) }}" alt="{{ $restaurant->name }}" loading="lazy" width="400" height="192" class="h-48 w-full object-cover">
                 </div>
             @endif
             @error('image')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
         <div class="sm:col-span-2">
-            <label class="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-stone-200">
+            <label class="surface-subtle text-body inline-flex items-center gap-3 rounded-2xl px-4 py-3 text-sm">
                 <input type="hidden" name="is_revisit" value="0">
-                <input type="checkbox" name="is_revisit" value="1" class="h-5 w-5 rounded border-white/20 bg-stone-900 text-orange-500 focus:ring-orange-400" @checked(old('is_revisit', $restaurant->is_revisit))>
+                <input type="checkbox" name="is_revisit" value="1" class="theme-border h-5 w-5 rounded border bg-transparent text-orange-500 focus:ring-orange-400" @checked(old('is_revisit', $restaurant->is_revisit))>
                 <span>Mark as worth revisiting</span>
             </label>
             @error('is_revisit')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
             @enderror
         </div>
     </div>

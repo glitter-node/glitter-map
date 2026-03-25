@@ -32,6 +32,17 @@ const buildMap = (element, center, zoom) => {
     return map
 }
 
+const parseMapConfig = (value) => {
+    if (!value) return null
+
+    try {
+        const parsed = JSON.parse(value)
+        return parsed && typeof parsed === 'object' ? parsed : null
+    } catch {
+        return null
+    }
+}
+
 const debounce = (callback, delay) => {
     let timeoutId = null
     return (...args) => {
@@ -198,3 +209,31 @@ window.restaurantMapPage = function (config = {}) {
         },
     }
 }
+
+const initializeShowMap = () => {
+    const element = document.getElementById('restaurant-show-map')
+    if (!element || element._restaurantMap) return
+
+    const config = parseMapConfig(element.dataset.mapConfig)
+    const marker = config?.marker
+    const latitude = coerceNumber(marker?.latitude)
+    const longitude = coerceNumber(marker?.longitude)
+
+    if (latitude === null || longitude === null) return
+
+    const zoom = coerceNumber(config?.zoom) ?? 16
+    const map = buildMap(element, { lat: latitude, lng: longitude }, zoom)
+    const leafletMarker = L.marker([latitude, longitude]).addTo(map)
+
+    if (marker?.label) {
+        leafletMarker.bindPopup(`<strong>${escapeHtml(marker.label)}</strong>`)
+    }
+
+    window.requestAnimationFrame(() => {
+        map.invalidateSize()
+    })
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeShowMap()
+})

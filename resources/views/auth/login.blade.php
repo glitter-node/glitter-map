@@ -24,9 +24,9 @@
                     ></div>
 
                     <div class="space-y-3 text-center">
-                        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-orange-300/80">Local Restaurant Diary</p>
-                        <h1 class="text-2xl font-extrabold text-white sm:text-3xl">Sign in to continue</h1>
-                        <p class="text-sm leading-7 text-stone-400">Choose how you want to access your dining log</p>
+                        <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">Local Restaurant Diary</p>
+                        <h1 class="text-display text-2xl font-extrabold sm:text-3xl">Sign in to continue</h1>
+                        <p class="text-body text-sm leading-7">Choose how you want to access your dining log</p>
                     </div>
 
                     <div class="flex flex-col gap-3">

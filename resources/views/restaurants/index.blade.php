@@ -20,31 +20,31 @@
             <div class="flex flex-col gap-6">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-orange-300/80">Dashboard</p>
-                        <h2 class="mt-2 text-lg sm:text-2xl font-extrabold text-white">Track every memorable meal</h2>
+                        <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">Dashboard</p>
+                        <h2 class="text-display mt-2 text-lg sm:text-2xl font-extrabold">Track every memorable meal</h2>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <button type="button" class="btn-secondary" :class="mapMode === 'list' ? 'border-2 border-orange-500 bg-orange-500/10 text-orange-700' : 'border border-gray-300 bg-transparent text-gray-500 hover:bg-transparent'" @click="setMapMode('list')">Card list</button>
-                        <button type="button" class="btn-secondary" :class="mapMode === 'map' ? 'border-2 border-orange-500 bg-orange-500/10 text-orange-700' : 'border border-gray-300 bg-transparent text-gray-500 hover:bg-transparent'" @click="setMapMode('map')">Map view</button>
+                        <button type="button" class="btn-secondary toggle-chip" :class="mapMode === 'list' ? 'toggle-chip-active' : ''" @click="setMapMode('list')">Card list</button>
+                        <button type="button" class="btn-secondary toggle-chip" :class="mapMode === 'map' ? 'toggle-chip-active' : ''" @click="setMapMode('map')">Map view</button>
                         <a href="{{ route('restaurants.create') }}" class="btn-primary">Add restaurant</a>
                     </div>
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <div class="rounded-3xl bg-white/5 p-3 sm:p-5">
-                        <p class="text-sm uppercase tracking-[0.2em] text-stone-400">Average rating</p>
-                        <p class="mt-4 text-xl sm:text-3xl font-extrabold text-amber-300">{{ $averageRating }}</p>
+                    <div class="surface-subtle rounded-3xl p-3 sm:p-5">
+                        <p class="text-muted text-sm uppercase tracking-[0.2em]">Average rating</p>
+                        <p class="rating-active mt-4 text-xl sm:text-3xl font-extrabold">{{ $averageRating }}</p>
                     </div>
-                    <div class="hidden rounded-3xl bg-white/5 p-3 sm:p-5 lg:block">
-                        <p class="text-sm uppercase tracking-[0.2em] text-stone-400">Top category</p>
-                        <p class="mt-4 text-2xl font-bold text-white">{{ $topCategoryLabel }}</p>
-                        <p class="mt-1 text-sm text-stone-400">{{ $topCategoryCount }} visits logged</p>
+                    <div class="surface-subtle hidden rounded-3xl p-3 sm:p-5 lg:block">
+                        <p class="text-muted text-sm uppercase tracking-[0.2em]">Top category</p>
+                        <p class="text-display mt-4 text-2xl font-bold">{{ $topCategoryLabel }}</p>
+                        <p class="text-body mt-1 text-sm">{{ $topCategoryCount }} visits logged</p>
                     </div>
-                    <div class="hidden rounded-3xl bg-white/5 p-3 sm:p-5 sm:col-span-2 lg:block">
+                    <div class="surface-subtle hidden rounded-3xl p-3 sm:p-5 sm:col-span-2 lg:block">
                         <div class="flex items-start justify-between gap-4">
                             <div>
-                                <p class="text-sm uppercase tracking-[0.2em] text-stone-400">Nearby restaurants</p>
-                                <p class="mt-2 text-sm text-stone-500">Uses your current location and shows the 10 closest saved places.</p>
+                                <p class="text-muted text-sm uppercase tracking-[0.2em]">Nearby restaurants</p>
+                                <p class="text-body mt-2 text-sm">Uses your current location and shows the 10 closest saved places.</p>
                             </div>
                             <button type="button" class="btn-secondary" @click="locateUser()" :disabled="nearbyLoading">
                                 <span x-show="!nearbyLoading">Locate me</span>
@@ -54,30 +54,30 @@
 
                         <div class="mt-5 grid gap-3">
                             <template x-if="nearbyError">
-                                <p class="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200" x-text="nearbyError"></p>
+                                <p class="status-danger px-4 py-3 text-sm" x-text="nearbyError"></p>
                             </template>
 
                             <template x-if="userLocation">
-                                <p class="text-xs uppercase tracking-[0.2em] text-stone-500" x-text="`Current location: ${userLocation.latitude.toFixed(4)}, ${userLocation.longitude.toFixed(4)}`"></p>
+                                <p class="text-muted text-xs uppercase tracking-[0.2em]" x-text="`Current location: ${userLocation.latitude.toFixed(4)}, ${userLocation.longitude.toFixed(4)}`"></p>
                             </template>
 
                             <template x-for="restaurant in nearbyRestaurants" :key="restaurant.id">
-                                <a :href="restaurant.show_url" class="rounded-2xl border border-white/10 bg-stone-900/60 px-4 py-3 transition hover:border-orange-300/40 hover:bg-stone-900">
+                                <a :href="restaurant.show_url" class="surface-elevated rounded-2xl px-4 py-3 transition">
                                     <div class="flex items-start justify-between gap-4">
                                         <div class="min-w-0">
-                                            <p class="truncate font-semibold text-white" x-text="restaurant.name"></p>
-                                            <p class="mt-1 truncate text-sm text-stone-400" x-text="restaurant.address"></p>
+                                            <p class="text-display truncate font-semibold" x-text="restaurant.name"></p>
+                                            <p class="text-body mt-1 truncate text-sm" x-text="restaurant.address"></p>
                                         </div>
                                         <div class="shrink-0 text-right">
-                                            <p class="text-sm font-semibold text-orange-200" x-text="`${restaurant.distance_km} km`"></p>
-                                            <p class="mt-1 text-xs uppercase tracking-[0.2em] text-stone-500" x-text="restaurant.category"></p>
+                                            <p class="eyebrow text-sm font-semibold" x-text="`${restaurant.distance_km} km`"></p>
+                                            <p class="text-muted mt-1 text-xs uppercase tracking-[0.2em]" x-text="restaurant.category"></p>
                                         </div>
                                     </div>
                                 </a>
                             </template>
 
                             <template x-if="!nearbyLoading && !nearbyRestaurants.length && !nearbyError">
-                                <p class="text-sm text-stone-500">Allow location access to see the closest restaurants.</p>
+                                <p class="text-body text-sm">Allow location access to see the closest restaurants.</p>
                             </template>
                         </div>
                     </div>
@@ -138,19 +138,19 @@
         >
             <div class="mb-4 flex items-center justify-between gap-3">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-orange-300/80">Viewport loading</p>
-                    <h3 class="mt-2 text-2xl font-bold text-white">Visible markers only</h3>
+                    <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">Viewport loading</p>
+                    <h3 class="text-display mt-2 text-2xl font-bold">Visible markers only</h3>
                 </div>
-                <div class="text-right text-xs uppercase tracking-[0.2em] text-stone-500">
+                <div class="text-muted text-right text-xs uppercase tracking-[0.2em]">
                     <p x-show="mapLoading" x-cloak>Loading markers</p>
                     <p x-show="!mapLoading" x-text="`${markers.length} markers loaded`"></p>
                 </div>
             </div>
 
-            <div id="restaurants-index-map" class="h-[420px] overflow-hidden rounded-3xl border border-white/10"></div>
+            <div id="restaurants-index-map" class="map-frame h-[420px] overflow-hidden rounded-3xl"></div>
 
             <template x-if="mapError">
-                <p class="mt-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200" x-text="mapError"></p>
+                <p class="status-danger mt-4 px-4 py-3 text-sm" x-text="mapError"></p>
             </template>
         </div>
 
@@ -161,9 +161,9 @@
                     <div class="space-y-3">
                         <x-restaurant-card :restaurant="$restaurant" :priority="$loop->first" />
                         @if ($restaurant->geocode_status === 'pending')
-                            <p class="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">위치 처리 중</p>
+                            <p class="status-warning px-4 py-3 text-sm">위치 처리 중</p>
                         @elseif ($restaurant->geocode_status === 'failed')
-                            <p class="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">위치 처리 실패</p>
+                            <p class="status-danger px-4 py-3 text-sm">위치 처리 실패</p>
                         @endif
                     </div>
                 @endforeach
@@ -174,8 +174,8 @@
             </div>
         @else
             <div class="panel p-10 text-center">
-                <p class="text-lg font-semibold text-white">No restaurants match this filter.</p>
-                <p class="mt-2 text-sm text-stone-400">Add your first spot or widen the search conditions.</p>
+                <p class="text-display text-lg font-semibold">No restaurants match this filter.</p>
+                <p class="text-body mt-2 text-sm">Add your first spot or widen the search conditions.</p>
             </div>
         @endif
         </div>
