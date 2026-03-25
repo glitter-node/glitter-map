@@ -17,40 +17,62 @@ class RestaurantController extends Controller
 {
     public function index(Request $request): View
     {
-        $filters = $request->only(['category', 'search']);
-        $sort = $request->string('sort')->toString();
+        return view('restaurants.index', $this->buildListContext($request));
+    }
 
-        $restaurants = Restaurant::query()
-            ->filter($filters)
-            ->sort($sort)
-            ->paginate(12)
-            ->withQueryString();
+    public function map(Request $request): View
+    {
+        return view('restaurants.map', [
+            ...$this->buildFilterContext($request, false),
+            'mapApiUrl' => route('api.restaurants.map'),
+        ]);
+    }
 
-        $averageRating = Restaurant::query()
-            ->filter($filters)
+    public function insights(Request $request): View
+    {
+        $filters = $this->normalizedFilters($request);
+        $baseQuery = Restaurant::query()->filter($filters);
+
+        $averageRating = $baseQuery
+            ->clone()
             ->selectRaw('COALESCE(AVG(rating), 0) as average_rating')
             ->value('average_rating');
 
-        $topCategory = Restaurant::query()
-            ->filter($filters)
+        $topCategory = $baseQuery
+            ->clone()
             ->select('category', DB::raw('COUNT(*) as total'))
             ->groupBy('category')
             ->orderByDesc('total')
             ->orderBy('category')
             ->first();
 
-        return view('restaurants.index', [
-            'restaurants' => $restaurants,
-            'categories' => Restaurant::CATEGORIES,
-            'filters' => [
-                'category' => $filters['category'] ?? null,
-                'search' => $filters['search'] ?? null,
-                'sort' => $sort ?: 'latest',
-            ],
+        $categoryBreakdown = $baseQuery
+            ->clone()
+            ->select('category', DB::raw('COUNT(*) as total'))
+            ->groupBy('category')
+            ->orderByDesc('total')
+            ->orderBy('category')
+            ->get()
+            ->map(fn ($row) => [
+                'label' => Restaurant::CATEGORIES[$row->category] ?? ucfirst($row->category),
+                'total' => $row->total,
+            ]);
+
+        return view('restaurants.insights', [
+            ...$this->buildFilterContext($request, false),
+            'restaurantCount' => $baseQuery->clone()->count(),
+            'revisitCount' => $baseQuery->clone()->where('is_revisit', true)->count(),
+            'locationCount' => $baseQuery->clone()->hasLocation()->count(),
             'averageRating' => number_format((float) $averageRating, 1),
             'topCategoryLabel' => $topCategory ? Restaurant::CATEGORIES[$topCategory->category] : 'No data',
             'topCategoryCount' => $topCategory?->total ?? 0,
-            'mapApiUrl' => route('api.restaurants.map'),
+            'categoryBreakdown' => $categoryBreakdown,
+        ]);
+    }
+
+    public function nearby(): View
+    {
+        return view('restaurants.nearby', [
             'nearbyApiUrl' => route('api.restaurants.nearby'),
         ]);
     }
@@ -105,11 +127,21 @@ class RestaurantController extends Controller
 
     public function update(UpdateRestaurantRequest $request, Restaurant $restaurant): RedirectResponse
     {
+        $oldImagePath = $restaurant->image_path;
+        $newImagePath = null;
+
         try {
-            DB::transaction(function () use ($request, $restaurant) {
-                $restaurant->update($this->validatedData($request, $restaurant));
+            DB::transaction(function () use ($request, $restaurant, &$newImagePath) {
+                $data = $this->validatedData($request, $restaurant);
+                $newImagePath = $data['image_path'] ?? null;
+
+                $restaurant->update($data);
             });
         } catch (Throwable $exception) {
+            if ($newImagePath) {
+                Storage::disk('public')->delete($newImagePath);
+            }
+
             Log::error('Failed to update restaurant.', [
                 'restaurant_id' => $restaurant->id,
                 'message' => $exception->getMessage(),
@@ -118,6 +150,10 @@ class RestaurantController extends Controller
             return back()
                 ->withInput()
                 ->with('error', 'Unable to update the restaurant right now.');
+        }
+
+        if ($newImagePath && $oldImagePath) {
+            Storage::disk('public')->delete($oldImagePath);
         }
 
         return redirect()
@@ -173,15 +209,72 @@ class RestaurantController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            if ($restaurant?->image_path) {
-                Storage::disk('public')->delete($restaurant->image_path);
-            }
-
             $data['image_path'] = $request->file('image')->store('restaurants', 'public');
         }
 
         unset($data['image']);
 
         return $data;
+    }
+
+    protected function buildListContext(Request $request): array
+    {
+        $filterContext = $this->buildFilterContext($request);
+
+        return [
+            ...$filterContext,
+            'restaurants' => Restaurant::query()
+                ->filter($filterContext['filters'])
+                ->sort($filterContext['filters']['sort'])
+                ->paginate(12)
+                ->withQueryString(),
+        ];
+    }
+
+    protected function buildFilterContext(Request $request, bool $includeSort = true): array
+    {
+        $filters = $this->normalizedFilters($request, $includeSort);
+        $activeFilters = [];
+
+        if ($filters['search']) {
+            $activeFilters[] = [
+                'label' => 'Search',
+                'value' => $filters['search'],
+            ];
+        }
+
+        if ($filters['category']) {
+            $activeFilters[] = [
+                'label' => 'Category',
+                'value' => Restaurant::CATEGORIES[$filters['category']] ?? ucfirst($filters['category']),
+            ];
+        }
+
+        if ($includeSort && $filters['sort'] !== 'latest') {
+            $activeFilters[] = [
+                'label' => 'Sort',
+                'value' => match ($filters['sort']) {
+                    'rating_desc' => 'Highest rating',
+                    'rating_asc' => 'Lowest rating',
+                    default => 'Latest',
+                },
+            ];
+        }
+
+        return [
+            'categories' => Restaurant::CATEGORIES,
+            'filters' => $filters,
+            'activeFilters' => $activeFilters,
+            'hasActiveFilters' => filled($filters['search']) || filled($filters['category']) || ($includeSort && $filters['sort'] !== 'latest'),
+        ];
+    }
+
+    protected function normalizedFilters(Request $request, bool $includeSort = true): array
+    {
+        return [
+            'category' => $request->filled('category') ? $request->string('category')->toString() : null,
+            'search' => $request->filled('search') ? trim($request->string('search')->toString()) : null,
+            'sort' => $includeSort ? ($request->string('sort')->toString() ?: 'latest') : 'latest',
+        ];
     }
 }

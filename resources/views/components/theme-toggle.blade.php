@@ -13,7 +13,9 @@
                 : (this.theme === 'dim' ? 'light' : 'dark');
 
             this.theme = next;
-            window.setTheme(next);
+            if (typeof window.setTheme === 'function') {
+                window.setTheme(next);
+            }
             this.announcement = `Theme switched to ${next}.`;
         },
     }"

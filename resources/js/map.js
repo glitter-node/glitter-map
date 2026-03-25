@@ -63,6 +63,7 @@ window.restaurantMapPage = function (config = {}) {
         mapLoading: false,
         mapError: null,
         nearbyLoading: false,
+        nearbyState: 'idle',
         nearbyRestaurants: [],
         nearbyError: null,
         userLocation: null,
@@ -132,7 +133,7 @@ window.restaurantMapPage = function (config = {}) {
                 const markers = Array.isArray(response.data?.data) ? response.data.data : []
                 this.renderMarkers(markers)
             } catch {
-                this.mapError = 'Unable to load map markers.'
+                this.mapError = 'Map markers could not be loaded. Check your connection and try again.'
             } finally {
                 this.mapLoading = false
             }
@@ -171,12 +172,18 @@ window.restaurantMapPage = function (config = {}) {
 
         async locateUser() {
             if (!navigator.geolocation || !this.nearbyApiUrl || !window.axios) {
-                this.nearbyError = 'Location is unavailable.'
+                this.nearbyRestaurants = []
+                this.userLocation = null
+                this.nearbyError = 'This device or browser does not support location access.'
+                this.nearbyState = 'error'
                 return
             }
 
+            this.nearbyRestaurants = []
+            this.userLocation = null
             this.nearbyLoading = true
             this.nearbyError = ''
+            this.nearbyState = 'loading'
 
             navigator.geolocation.getCurrentPosition(
                 async ({ coords }) => {
@@ -194,15 +201,24 @@ window.restaurantMapPage = function (config = {}) {
                         })
 
                         this.nearbyRestaurants = Array.isArray(response.data?.data) ? response.data.data : []
+                        if (!this.nearbyRestaurants.length) {
+                            this.nearbyState = 'empty'
+                        } else {
+                            this.nearbyState = 'success'
+                        }
                     } catch {
-                        this.nearbyError = 'Unable to load nearby restaurants.'
+                        this.nearbyError = 'Nearby restaurants could not be loaded. Try again in a moment.'
+                        this.nearbyState = 'error'
                     } finally {
                         this.nearbyLoading = false
                     }
                 },
-                () => {
+                (error) => {
                     this.nearbyLoading = false
-                    this.nearbyError = 'Location access was denied.'
+                    this.nearbyError = error.code === error.PERMISSION_DENIED
+                        ? 'Location permission was denied. Allow browser location access, then press “Use current location” again.'
+                        : 'Your location could not be determined. Check location settings and try again.'
+                    this.nearbyState = 'error'
                 },
                 { enableHighAccuracy: true, timeout: 5000 }
             )

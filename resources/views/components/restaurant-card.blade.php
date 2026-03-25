@@ -43,7 +43,7 @@
             </div>
 
             <div class="text-body flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-0">
-                <span>{{ $restaurant->visited_at->format('M d, Y') }}</span>
+                <span>{{ optional($restaurant->visited_at)->format('M d, Y') ?? 'Not recorded' }}</span>
                 @if ($restaurant->is_revisit)
                     <span class="badge badge-success">Revisit</span>
                 @endif

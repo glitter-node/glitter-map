@@ -75,7 +75,7 @@ class RestaurantObserver implements ShouldHandleEventsAfterCommit
             event($event);
         } catch (Throwable $exception) {
             Log::warning('Failed to dispatch restaurant broadcast event.', [
-                'event' => $event::class,
+                'event' => isset($event) ? $event::class : 'unknown',
                 'message' => $exception->getMessage(),
             ]);
         }

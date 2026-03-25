@@ -43,7 +43,7 @@
                     </div>
                     <div class="surface-subtle rounded-2xl p-2 sm:p-4">
                         <p class="text-muted text-sm uppercase tracking-[0.2em]">Visited</p>
-                        <p class="text-display mt-3 text-xl font-bold">{{ $restaurant->visited_at->format('F d, Y') }}</p>
+                        <p class="text-display mt-3 text-xl font-bold">{{ optional($restaurant->visited_at)->format('F d, Y') ?? 'Not recorded' }}</p>
                     </div>
                 </div>
 

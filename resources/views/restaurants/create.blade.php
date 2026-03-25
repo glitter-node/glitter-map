@@ -10,6 +10,7 @@
             :categories="$categories"
             :action="route('restaurants.store')"
             submit-label="Save restaurant"
+            variant="create"
         />
     </section>
 </x-layouts.app>

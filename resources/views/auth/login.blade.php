@@ -4,8 +4,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>Sign In | Local Restaurant Diary</title>
-        <meta name="description" content="Choose how to access your dining log.">
+        <title>Continue | Local Restaurant Diary</title>
+        <meta name="description" content="Enter your email to receive a secure access link.">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -23,15 +23,40 @@
                         data-auto_prompt="true"
                     ></div>
 
+                    @if (session('success'))
+                        <div class="status-success px-4 py-3 text-sm">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="status-danger px-4 py-3 text-sm">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
                     <div class="space-y-3 text-center">
                         <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">Local Restaurant Diary</p>
-                        <h1 class="text-display text-2xl font-extrabold sm:text-3xl">Sign in to continue</h1>
-                        <p class="text-body text-sm leading-7">Choose how you want to access your dining log</p>
+                        <h1 class="text-display text-2xl font-extrabold sm:text-3xl">Continue with email</h1>
+                        <p class="text-body text-sm leading-7">Enter your email to receive a secure access link</p>
                     </div>
 
+                    <form action="{{ route('auth.link') }}" method="POST" class="space-y-4">
+                        @csrf
+
+                        <div>
+                            <label for="email" class="label text-left">Email</label>
+                            <input id="email" name="email" type="email" class="input" value="{{ old('email') }}" required autocomplete="email">
+                            @error('email')
+                                <p class="text-danger mt-2 text-sm">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <button type="submit" class="btn-primary w-full">Send access link</button>
+                    </form>
+
                     <div class="flex flex-col gap-3">
-                        <a href="{{ route('auth.google.redirect') }}" class="btn-primary w-full">Continue with Google</a>
-                        <a href="{{ route('auth.email.request') }}" class="btn-secondary w-full">Continue with Email</a>
+                        <a href="{{ route('auth.google.redirect') }}" class="btn-secondary w-full">Continue with Google</a>
                     </div>
 
                     <div class="pt-2 text-center">

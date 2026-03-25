@@ -14,18 +14,26 @@
         @stack('head')
     </head>
     <body>
+        @php($isAuthenticated = auth()->check())
         <div class="shell">
-            <div class="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-5 sm:px-6 lg:px-8">
-                <nav class="panel mb-6 flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                    <a href="{{ route('restaurants.index') }}" class="min-w-0">
+            <div class="mx-auto flex min-h-screen max-w-7xl flex-col px-4 {{ $isAuthenticated ? 'py-5' : 'py-3 sm:py-4' }} sm:px-6 lg:px-8">
+                <nav class="panel {{ $isAuthenticated ? 'mb-6 gap-4 px-5 py-4 sm:px-6' : 'mb-4 gap-3 px-4 py-3 sm:px-5' }} flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <a href="{{ $isAuthenticated ? route('restaurants.index') : route('landing') }}" class="min-w-0">
                         <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">local-restaurant-diary</p>
-                        <h1 class="text-display truncate text-lg font-extrabold sm:text-2xl">Neighborhood dining log</h1>
+                        <h1 class="text-display truncate {{ $isAuthenticated ? 'text-lg sm:text-2xl' : 'text-base sm:text-xl' }} font-extrabold">Neighborhood dining log</h1>
                     </a>
 
                     <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                         <x-theme-toggle />
-                        <a href="{{ route('restaurants.index') }}" class="{{ request()->routeIs('restaurants.index') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.index')) aria-current="page" @endif>List</a>
-                        <a href="{{ route('restaurants.create') }}" class="{{ request()->routeIs('restaurants.create') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.create')) aria-current="page" @endif>Add</a>
+                        @auth
+                            <a href="{{ route('restaurants.index') }}" class="{{ request()->routeIs('restaurants.index') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.index')) aria-current="page" @endif>List</a>
+                            <a href="{{ route('restaurants.map') }}" class="{{ request()->routeIs('restaurants.map') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.map')) aria-current="page" @endif>Map</a>
+                            <a href="{{ route('restaurants.insights') }}" class="{{ request()->routeIs('restaurants.insights') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.insights')) aria-current="page" @endif>Insights</a>
+                            <a href="{{ route('restaurants.nearby') }}" class="{{ request()->routeIs('restaurants.nearby') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.nearby')) aria-current="page" @endif>Nearby</a>
+                            <a href="{{ route('restaurants.create') }}" class="{{ request()->routeIs('restaurants.create') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.create')) aria-current="page" @endif>Add</a>
+                        @else
+                            <a href="{{ route('auth.google.redirect') }}" class="btn-primary">Get Started</a>
+                        @endauth
                     </div>
                 </nav>
 
