@@ -42,7 +42,7 @@ const buildMap = (element, center, zoom) => {
         maxZoom: 19,
     }).addTo(map)
 
-    element._restaurantMap = map
+    element._placeMap = map
     return map
 }
 
@@ -69,13 +69,13 @@ const fetchShowMapLocation = async (url) => {
 
 const startShowMapPolling = (element, config) => {
     const pollUrl = config?.pollUrl
-    if (!pollUrl || element.dataset.polling === 'true' || element._restaurantMap) return
+    if (!pollUrl || element.dataset.polling === 'true' || element._placeMap) return
 
     element.dataset.polling = 'true'
     const startedAt = Date.now()
 
     const poll = async () => {
-        if (element._restaurantMap) return
+        if (element._placeMap) return
 
         if (Date.now() - startedAt >= SHOW_MAP_POLL_TIMEOUT_MS) {
             delete element.dataset.polling
@@ -118,7 +118,7 @@ const debounce = (callback, delay) => {
     }
 }
 
-window.restaurantMapPage = function (config = {}) {
+window.placeMapPage = function (config = {}) {
     return {
         mapApiUrl: config.mapApiUrl ?? '',
         nearbyApiUrl: config.nearbyApiUrl ?? '',
@@ -131,7 +131,7 @@ window.restaurantMapPage = function (config = {}) {
         mapError: null,
         nearbyLoading: false,
         nearbyState: 'idle',
-        nearbyRestaurants: [],
+        nearbyPlaces: [],
         nearbyError: null,
         userLocation: null,
         hasFitBounds: false,
@@ -156,7 +156,7 @@ window.restaurantMapPage = function (config = {}) {
         },
 
         initializeIndexMap() {
-            const element = document.getElementById('restaurants-index-map')
+            const element = document.getElementById('places-index-map')
             if (!element) return
 
             if (this.map) {
@@ -189,14 +189,13 @@ window.restaurantMapPage = function (config = {}) {
                 zoom: String(this.map.getZoom()),
             })
 
-            if (this.filters.category) params.set('category', this.filters.category)
             if (this.filters.search) params.set('search', this.filters.search)
 
             this.mapLoading = true
             this.mapError = ''
 
             try {
-                const response = await window.axios.get('/api/restaurants/map', { params, withCredentials: true })
+                const response = await window.axios.get('/api/places/map', { params, withCredentials: true })
                 const markers = Array.isArray(response.data?.data) ? response.data.data : []
                 this.renderMarkers(markers)
             } catch {
@@ -239,14 +238,14 @@ window.restaurantMapPage = function (config = {}) {
 
         async locateUser() {
             if (!navigator.geolocation || !this.nearbyApiUrl || !window.axios) {
-                this.nearbyRestaurants = []
+                this.nearbyPlaces = []
                 this.userLocation = null
                 this.nearbyError = 'This device or browser does not support location access.'
                 this.nearbyState = 'error'
                 return
             }
 
-            this.nearbyRestaurants = []
+            this.nearbyPlaces = []
             this.userLocation = null
             this.nearbyLoading = true
             this.nearbyError = ''
@@ -267,14 +266,14 @@ window.restaurantMapPage = function (config = {}) {
                             },
                         })
 
-                        this.nearbyRestaurants = Array.isArray(response.data?.data) ? response.data.data : []
-                        if (!this.nearbyRestaurants.length) {
+                        this.nearbyPlaces = Array.isArray(response.data?.data) ? response.data.data : []
+                        if (!this.nearbyPlaces.length) {
                             this.nearbyState = 'empty'
                         } else {
                             this.nearbyState = 'success'
                         }
                     } catch {
-                        this.nearbyError = 'Nearby restaurants could not be loaded. Try again in a moment.'
+                        this.nearbyError = 'Nearby places could not be loaded. Try again in a moment.'
                         this.nearbyState = 'error'
                     } finally {
                         this.nearbyLoading = false
@@ -294,8 +293,8 @@ window.restaurantMapPage = function (config = {}) {
 }
 
 const initializeShowMap = () => {
-    const element = document.getElementById('restaurant-show-map')
-    if (!element || element._restaurantMap) return
+    const element = document.getElementById('place-show-map')
+    if (!element || element._placeMap) return
 
     const config = parseMapConfig(element.dataset.mapConfig)
     const marker = config?.marker

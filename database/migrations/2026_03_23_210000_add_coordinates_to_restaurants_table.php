@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('restaurants', function (Blueprint $table) {
+        Schema::table('places', function (Blueprint $table) {
             $table->decimal('latitude', 10, 7)->nullable()->after('image_path');
             $table->decimal('longitude', 10, 7)->nullable()->after('latitude');
             $table->index(['latitude', 'longitude']);
@@ -17,7 +17,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('restaurants', function (Blueprint $table) {
+        Schema::table('places', function (Blueprint $table) {
             $table->dropIndex(['latitude', 'longitude']);
             $table->dropColumn(['latitude', 'longitude']);
         });

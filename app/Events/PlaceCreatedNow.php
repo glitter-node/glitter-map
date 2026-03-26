@@ -2,37 +2,31 @@
 
 namespace App\Events;
 
+use App\Models\Place;
 use App\Support\BroadcastTrace;
-use Illuminate\Bus\Queueable;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class RestaurantDeleted implements ShouldBroadcast, ShouldDispatchAfterCommit, ShouldQueue
+class PlaceCreatedNow implements ShouldBroadcastNow
 {
     use Dispatchable;
-    use Queueable;
     use SerializesModels;
 
-    public function __construct(
-        public int $restaurantId,
-    ) {
-        $this->onQueue('broadcasts');
-
+    public function __construct(public Place $place)
+    {
         BroadcastTrace::log('event.constructor', [
             'event' => static::class,
-            'mode' => 'queued',
-            'restaurant_id' => $this->restaurantId,
+            'mode' => 'sync',
+            'place_id' => $this->place->id,
         ]);
     }
 
     public function broadcastOn(): array
     {
         $channels = [
-            new Channel('restaurants.map'),
+            new Channel('places.map'),
         ];
 
         BroadcastTrace::log('event.broadcastOn', [
@@ -45,13 +39,16 @@ class RestaurantDeleted implements ShouldBroadcast, ShouldDispatchAfterCommit, S
 
     public function broadcastAs(): string
     {
-        return 'restaurant.deleted';
+        return 'place.created.now';
     }
 
     public function broadcastWith(): array
     {
         $payload = [
-            'id' => $this->restaurantId,
+            'id' => $this->place->id,
+            'name' => $this->place->name,
+            'latitude' => $this->place->latitude,
+            'longitude' => $this->place->longitude,
         ];
 
         BroadcastTrace::log('event.broadcastWith', [

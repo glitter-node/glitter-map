@@ -18,7 +18,7 @@ class MagicLinkAuthController extends Controller
     public function showLoginForm(): View|RedirectResponse
     {
         if (auth()->check()) {
-            return redirect()->route('restaurants.index');
+            return redirect()->route('places.index');
         }
 
         return view('auth.login');
@@ -75,7 +75,7 @@ class MagicLinkAuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()
-            ->route('restaurants.index')
+            ->route('places.index')
             ->with('success', 'Access granted.');
     }
 
@@ -92,6 +92,6 @@ class MagicLinkAuthController extends Controller
             ->title()
             ->value();
 
-        return $name !== '' ? $name : 'Restaurant Guest';
+        return $name !== '' ? $name : 'Place Guest';
     }
 }

@@ -11,7 +11,7 @@ function handleGoogleCredential(response) {
         }),
     }).then((res) => {
         if (res.ok) {
-            window.location.href = '/restaurants';
+            window.location.href = '/places';
         }
     });
 }

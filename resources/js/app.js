@@ -9,7 +9,7 @@ import L from 'leaflet'
 window.L = L
 window.Alpine = Alpine
 
-import './restaurant'
+import './place'
 import './map.js'
 
 Alpine.start()

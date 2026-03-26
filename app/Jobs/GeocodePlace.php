@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\Restaurant;
-use App\Services\RestaurantGeocodingService;
+use App\Models\Place;
+use App\Services\PlaceGeocodingService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class GeocodeRestaurant implements ShouldQueue
+class GeocodePlace implements ShouldQueue
 {
     use InteractsWithQueue;
     use Queueable;
@@ -21,22 +21,22 @@ class GeocodeRestaurant implements ShouldQueue
 
     public int $timeout = 20;
 
-    public function __construct(public int $restaurantId)
+    public function __construct(public int $placeId)
     {
         $this->onQueue('geocoding');
         $this->afterCommit();
     }
 
-    public function handle(RestaurantGeocodingService $geocodingService): void
+    public function handle(PlaceGeocodingService $geocodingService): void
     {
-        $restaurant = Restaurant::query()->find($this->restaurantId);
+        $place = Place::query()->find($this->placeId);
 
-        if (! $restaurant) {
+        if (! $place) {
             return;
         }
 
-        if (blank($restaurant->address)) {
-            $restaurant->forceFill([
+        if (blank($place->address)) {
+            $place->forceFill([
                 'geocode_status' => 'failed',
                 'geocoded_at' => null,
             ])->save();
@@ -44,17 +44,17 @@ class GeocodeRestaurant implements ShouldQueue
             return;
         }
 
-        if (! is_null($restaurant->latitude) && ! is_null($restaurant->longitude) && $restaurant->geocode_status === 'done') {
+        if (! is_null($place->latitude) && ! is_null($place->longitude) && $place->geocode_status === 'done') {
             return;
         }
 
-        $coordinates = $geocodingService->geocode($restaurant->address);
+        $coordinates = $geocodingService->geocode($place->address);
 
         if (! $coordinates) {
-            throw new \RuntimeException('Unable to geocode restaurant address.');
+            throw new \RuntimeException('Unable to geocode place address.');
         }
 
-        $restaurant->forceFill([
+        $place->forceFill([
             'latitude' => $coordinates['latitude'],
             'longitude' => $coordinates['longitude'],
             'geocode_status' => 'done',
@@ -64,15 +64,15 @@ class GeocodeRestaurant implements ShouldQueue
 
     public function failed(Throwable $exception): void
     {
-        Restaurant::query()
-            ->whereKey($this->restaurantId)
+        Place::query()
+            ->whereKey($this->placeId)
             ->update([
                 'geocode_status' => 'failed',
                 'geocoded_at' => null,
             ]);
 
-        Log::error('Restaurant geocoding job failed.', [
-            'restaurant_id' => $this->restaurantId,
+        Log::error('Place geocoding job failed.', [
+            'place_id' => $this->placeId,
             'message' => $exception->getMessage(),
         ]);
     }

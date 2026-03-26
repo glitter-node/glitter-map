@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>Continue | Local Restaurant Diary</title>
+        <title>Continue | Personal Spatial Memory Log</title>
         <meta name="description" content="Enter your email to receive a secure access link.">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800" rel="stylesheet" />
@@ -36,7 +36,7 @@
                     @endif
 
                     <div class="space-y-3 text-center">
-                        <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">Local Restaurant Diary</p>
+                        <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">Personal Spatial Memory Log</p>
                         <h1 class="text-display text-2xl font-extrabold sm:text-3xl">Continue with email</h1>
                         <p class="text-body text-sm leading-7">Enter your email to receive a secure access link</p>
                     </div>

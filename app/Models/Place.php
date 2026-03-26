@@ -5,25 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class Restaurant extends Model
+class Place extends Model
 {
-    public const CATEGORIES = [
-        'korean' => 'Korean',
-        'chinese' => 'Chinese',
-        'japanese' => 'Japanese',
-        'western' => 'Western',
-        'cafe' => 'Cafe',
-        'other' => 'Other',
-    ];
-
     protected $fillable = [
         'name',
         'address',
-        'category',
-        'rating',
-        'visited_at',
-        'memo',
-        'is_revisit',
+        'context',
+        'impression',
+        'experienced_at',
+        'memory_note',
+        'revisit_intention',
         'image_path',
         'latitude',
         'longitude',
@@ -34,9 +25,9 @@ class Restaurant extends Model
     protected function casts(): array
     {
         return [
-            'visited_at' => 'date',
-            'is_revisit' => 'boolean',
-            'rating' => 'decimal:1',
+            'experienced_at' => 'date',
+            'revisit_intention' => 'boolean',
+            'impression' => 'decimal:1',
             'latitude' => 'float',
             'longitude' => 'float',
             'geocoded_at' => 'datetime',
@@ -66,31 +57,29 @@ class Restaurant extends Model
     {
         return $query
             ->when(
-                filled($filters['category'] ?? null) && array_key_exists($filters['category'], self::CATEGORIES),
-                fn (Builder $query) => $query->where('category', $filters['category'])
-            )
-            ->when(filled($filters['search'] ?? null), function (Builder $query) use ($filters) {
-                $search = trim($filters['search']);
+                filled($filters['search'] ?? null),
+                function (Builder $query) use ($filters) {
+                    $search = trim($filters['search']);
 
-                $query->where(function (Builder $query) use ($search) {
-                    $query
-                        ->where('name', 'like', "%{$search}%")
-                        ->orWhere('address', 'like', "%{$search}%");
-                });
-            });
+                    $query->where(function (Builder $query) use ($search) {
+                        $query
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('address', 'like', "%{$search}%")
+                            ->orWhere('context', 'like', "%{$search}%")
+                            ->orWhere('memory_note', 'like', "%{$search}%");
+                    });
+                }
+            )
+        ;
     }
 
     public function scopeSort(Builder $query, ?string $sort): Builder
     {
         return match ($sort) {
-            'rating_desc' => $query->orderByDesc('rating')->orderByDesc('visited_at'),
-            'rating_asc' => $query->orderBy('rating')->orderByDesc('visited_at'),
-            default => $query->orderByDesc('visited_at')->orderByDesc('created_at'),
+            'impression_desc' => $query->orderByDesc('impression')->orderByDesc('experienced_at'),
+            'impression_asc' => $query->orderBy('impression')->orderByDesc('experienced_at'),
+            default => $query->orderByDesc('experienced_at')->orderByDesc('created_at'),
         };
     }
 
-    public function getCategoryLabelAttribute(): string
-    {
-        return self::CATEGORIES[$this->category] ?? ucfirst($this->category);
-    }
 }

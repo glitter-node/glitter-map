@@ -2,6 +2,6 @@
 
 use Illuminate\Support\Facades\Broadcast;
 
-Broadcast::channel('restaurants.map', function () {
+Broadcast::channel('places.map', function () {
     return true;
 });

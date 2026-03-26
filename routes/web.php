@@ -2,12 +2,12 @@
 
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\MagicLinkAuthController;
-use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\PlaceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (auth()->check()) {
-        return redirect()->route('restaurants.index');
+        return redirect()->route('places.index');
     }
 
     return view('landing');
@@ -27,14 +27,14 @@ Route::post('/auth/google/one-tap', [GoogleAuthController::class, 'oneTap'])
     ->name('auth.google.one-tap');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/restaurants/map', [RestaurantController::class, 'map'])
-        ->name('restaurants.map');
-    Route::get('/restaurants/{restaurant}/location', [RestaurantController::class, 'location'])
-        ->name('restaurants.location');
-    Route::get('/insights', [RestaurantController::class, 'insights'])
-        ->name('restaurants.insights');
-    Route::get('/nearby', [RestaurantController::class, 'nearby'])
-        ->name('restaurants.nearby');
-    Route::resource('restaurants', RestaurantController::class)
+    Route::get('/places/map', [PlaceController::class, 'map'])
+        ->name('places.map');
+    Route::get('/places/{place}/location', [PlaceController::class, 'location'])
+        ->name('places.location');
+    Route::get('/insights', [PlaceController::class, 'insights'])
+        ->name('places.insights');
+    Route::get('/nearby', [PlaceController::class, 'nearby'])
+        ->name('places.nearby');
+    Route::resource('places', PlaceController::class)
         ->missing(fn () => response()->view('errors.404', [], 404));
 });

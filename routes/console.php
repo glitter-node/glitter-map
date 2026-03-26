@@ -2,10 +2,10 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
-use App\Events\RestaurantCreated;
-use App\Events\RestaurantCreatedNow;
-use App\Events\RestaurantDeleted;
-use App\Models\Restaurant;
+use App\Events\PlaceCreated;
+use App\Events\PlaceCreatedNow;
+use App\Events\PlaceDeleted;
+use App\Models\Place;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -19,18 +19,18 @@ Artisan::command('debug:broadcast-config', function () {
     $this->line('REVERB_PORT='.env('REVERB_PORT'));
 })->purpose('Print broadcast tracing environment values');
 
-Artisan::command('debug:broadcast-compare {restaurantId?}', function (?int $restaurantId = null) {
-    $restaurant = $restaurantId
-        ? Restaurant::query()->findOrFail($restaurantId)
-        : Restaurant::query()->latest('id')->firstOrFail();
+Artisan::command('debug:broadcast-compare {placeId?}', function (?int $placeId = null) {
+    $place = $placeId
+        ? Place::query()->findOrFail($placeId)
+        : Place::query()->latest('id')->firstOrFail();
 
-    event(new RestaurantCreated($restaurant));
-    event(new RestaurantCreatedNow($restaurant));
+    event(new PlaceCreated($place));
+    event(new PlaceCreatedNow($place));
 
     $this->info('queued and sync broadcast events dispatched');
-})->purpose('Dispatch queued and sync restaurant broadcast events for comparison');
+})->purpose('Dispatch queued and sync place broadcast events for comparison');
 
 Artisan::command('debug:broadcast-delete {id}', function (int $id) {
-    event(new RestaurantDeleted($id));
-    $this->info("restaurant.deleted dispatched for id={$id}");
+    event(new PlaceDeleted($id));
+    $this->info("place.deleted dispatched for id={$id}");
 })->purpose('Dispatch a delete broadcast event for tracing');

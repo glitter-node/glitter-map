@@ -1,9 +1,9 @@
-const registerRestaurantComponents = () => {
-    Alpine.data('ratingInput', (initialValue = 0) => ({
-        rating: Number(initialValue || 0),
+const registerPlaceComponents = () => {
+    Alpine.data('impressionInput', (initialValue = 0) => ({
+        impression: Number(initialValue || 0),
         hover: 0,
-        setRating(value) {
-            this.rating = value;
+        setImpression(value) {
+            this.impression = value;
         },
     }));
 
@@ -21,7 +21,7 @@ const registerRestaurantComponents = () => {
 };
 
 if (window.Alpine) {
-    registerRestaurantComponents();
+    registerPlaceComponents();
 } else {
-    document.addEventListener('alpine:init', registerRestaurantComponents);
+    document.addEventListener('alpine:init', registerPlaceComponents);
 }

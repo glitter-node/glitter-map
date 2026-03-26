@@ -1,24 +1,24 @@
-# Local Restaurant Diary
+# Personal Spatial Memory Log
 
 ## Overview
 
-Local Restaurant Diary is a Laravel application for tracking restaurants you have visited, rating them, storing notes and photos, and viewing saved locations on an interactive map.
+Personal Spatial Memory Log is a Laravel application for tracking meaningful places, preserving spatial experiences, storing memory notes and reference images, and viewing saved locations on an interactive map.
 
 The application combines a server-rendered CRUD interface with JSON map endpoints, queued geocoding, and realtime map updates over WebSockets. It is designed as a deployable production application, not a scaffold or demo.
 
 ## Features
 
-- Restaurant CRUD with name, address, category, rating, visit date, notes, image, and revisit flag
+- Place CRUD with place name, coordinates, context, impression, experience time, memory notes, reference image, and revisit intention
 - Interactive map view powered by Leaflet
 - Automatic address geocoding with queued background processing
-- Nearby restaurant lookup based on browser geolocation
-- Realtime restaurant create, update, and delete broadcasts
+- Nearby place lookup based on browser geolocation
+- Realtime place create, update, and delete broadcasts
 - Public landing page and unified auth entry page
 - Email pre-verification registration flow
 - Google OAuth login via Socialite
 - Google One Tap login
 - Theme support with persisted light, dim, and dark modes
-- Filtered and sortable restaurant listing
+- Filtered and sortable place listing
 - Responsive Blade UI built with Tailwind and Alpine
 
 ## Tech Stack
@@ -41,20 +41,20 @@ The application combines a server-rendered CRUD interface with JSON map endpoint
 - Web routes in routes/web.php
 - API routes in routes/api.php
 - Server-rendered UI handled by Blade views
-- Restaurant CRUD handled by RestaurantController
+- Place CRUD handled by PlaceController
 - Map and nearby JSON endpoints handled by Api\MapController
 - Auth flows handled by dedicated auth controllers
 
 ### Background flow
 
-- Restaurant create/update triggers observer side effects
+- Place create/update triggers observer side effects
 - Observer invalidates map tile cache
-- Pending addresses dispatch GeocodeRestaurant to the queue
-- Geocoding resolves coordinates and updates the restaurant record
+- Pending addresses dispatch GeocodePlace to the queue
+- Geocoding resolves coordinates and updates the place record
 
 ### Realtime flow
 
-- Restaurant lifecycle events broadcast over restaurants.map
+- Place lifecycle events broadcast over places.map
 - Events are queued and delivered through Laravel broadcasting
 - Frontend is prepared for Pusher-compatible WebSocket transport
 - Reverb is the default broadcast backend and uses the Pusher protocol

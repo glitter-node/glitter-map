@@ -29,7 +29,7 @@ class GoogleAuthController extends Controller
 
         request()->session()->regenerate();
 
-        return redirect()->route('restaurants.index');
+        return redirect()->route('places.index');
     }
 
     public function oneTap(Request $request): JsonResponse

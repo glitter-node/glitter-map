@@ -320,11 +320,11 @@
         color: var(--status-success-text);
     }
 
-    .rating-active {
+    .impression-active {
         color: #f59e0b;
     }
 
-    .rating-inactive {
+    .impression-inactive {
         color: color-mix(in srgb, var(--muted-text-subtle) 58%, transparent);
     }
 

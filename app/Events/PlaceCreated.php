@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Restaurant;
+use App\Models\Place;
 use Illuminate\Bus\Queueable;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -11,13 +11,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class RestaurantCreated implements ShouldBroadcast, ShouldDispatchAfterCommit, ShouldQueue
+class PlaceCreated implements ShouldBroadcast, ShouldDispatchAfterCommit, ShouldQueue
 {
     use Dispatchable;
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public Restaurant $restaurant)
+    public function __construct(public Place $place)
     {
         $this->onQueue('broadcasts');
     }
@@ -25,22 +25,22 @@ class RestaurantCreated implements ShouldBroadcast, ShouldDispatchAfterCommit, S
     public function broadcastOn(): array
     {
         return [
-            new Channel('restaurants.map'),
+            new Channel('places.map'),
         ];
     }
 
     public function broadcastAs(): string
     {
-        return 'restaurant.created';
+        return 'place.created';
     }
 
     public function broadcastWith(): array
     {
         return [
-            'id' => $this->restaurant->id,
-            'name' => $this->restaurant->name,
-            'latitude' => $this->restaurant->latitude,
-            'longitude' => $this->restaurant->longitude,
+            'id' => $this->place->id,
+            'name' => $this->place->name,
+            'latitude' => $this->place->latitude,
+            'longitude' => $this->place->longitude,
         ];
     }
 }

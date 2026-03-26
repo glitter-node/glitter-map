@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class StoreRestaurantRequest extends FormRequest
+class StorePlaceRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -17,11 +16,11 @@ class StoreRestaurantRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
-            'category' => ['required', Rule::in(['korean', 'chinese', 'japanese', 'western', 'cafe', 'other'])],
-            'rating' => ['required', 'numeric', 'min:1', 'max:5'],
-            'visited_at' => ['required', 'date'],
-            'memo' => ['nullable', 'string'],
-            'is_revisit' => ['boolean'],
+            'context' => ['required', 'string', 'max:1000'],
+            'impression' => ['required', 'numeric', 'min:1', 'max:5'],
+            'experienced_at' => ['required', 'date'],
+            'memory_note' => ['nullable', 'string'],
+            'revisit_intention' => ['boolean'],
             'image' => [
                 'nullable',
                 'file',
@@ -38,7 +37,7 @@ class StoreRestaurantRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'is_revisit' => $this->boolean('is_revisit'),
+            'revisit_intention' => $this->boolean('revisit_intention'),
             'latitude' => $this->filled('latitude') ? $this->input('latitude') : null,
             'longitude' => $this->filled('longitude') ? $this->input('longitude') : null,
         ]);

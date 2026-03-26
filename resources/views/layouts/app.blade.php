@@ -4,8 +4,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>{{ $title ?? ($pageTitle ?? 'Local Restaurant Diary') }}</title>
-        <meta name="description" content="Track memorable restaurants, revisit-worthy spots, and neighborhood favorites.">
+        <title>{{ $title ?? ($pageTitle ?? 'Personal Spatial Memory Log') }}</title>
+        <meta name="description" content="Track personal spatial experiences, recall meaningful places, and navigate them through map and timeline views.">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link rel="preload" href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800" as="style">
         <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800" rel="stylesheet" />
@@ -18,19 +18,19 @@
         <div class="shell">
             <div class="mx-auto flex min-h-screen max-w-7xl flex-col px-4 {{ $isAuthenticated ? 'py-5' : 'py-3 sm:py-4' }} sm:px-6 lg:px-8">
                 <nav class="panel {{ $isAuthenticated ? 'mb-6 gap-4 px-5 py-4 sm:px-6' : 'mb-4 gap-3 px-4 py-3 sm:px-5' }} flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <a href="{{ $isAuthenticated ? route('restaurants.index') : route('landing') }}" class="min-w-0">
-                        <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">local-restaurant-diary</p>
-                        <h1 class="text-display truncate {{ $isAuthenticated ? 'text-lg sm:text-2xl' : 'text-base sm:text-xl' }} font-extrabold">Neighborhood dining log</h1>
+                    <a href="{{ $isAuthenticated ? route('places.index') : route('landing') }}" class="min-w-0">
+                        <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">spatial-memory-log</p>
+                        <h1 class="text-display truncate {{ $isAuthenticated ? 'text-lg sm:text-2xl' : 'text-base sm:text-xl' }} font-extrabold">Personal Spatial Memory Log</h1>
                     </a>
 
                     <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                         <x-theme-toggle />
                         @auth
-                            <a href="{{ route('restaurants.index') }}" class="{{ request()->routeIs('restaurants.index') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.index')) aria-current="page" @endif>List</a>
-                            <a href="{{ route('restaurants.map') }}" class="{{ request()->routeIs('restaurants.map') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.map')) aria-current="page" @endif>Map</a>
-                            <a href="{{ route('restaurants.insights') }}" class="{{ request()->routeIs('restaurants.insights') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.insights')) aria-current="page" @endif>Insights</a>
-                            <a href="{{ route('restaurants.nearby') }}" class="{{ request()->routeIs('restaurants.nearby') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.nearby')) aria-current="page" @endif>Nearby</a>
-                            <a href="{{ route('restaurants.create') }}" class="{{ request()->routeIs('restaurants.create') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('restaurants.create')) aria-current="page" @endif>Add</a>
+                            <a href="{{ route('places.index') }}" class="{{ request()->routeIs('places.index') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('places.index')) aria-current="page" @endif>List</a>
+                            <a href="{{ route('places.map') }}" class="{{ request()->routeIs('places.map') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('places.map')) aria-current="page" @endif>Map</a>
+                            <a href="{{ route('places.insights') }}" class="{{ request()->routeIs('places.insights') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('places.insights')) aria-current="page" @endif>Insights</a>
+                            <a href="{{ route('places.nearby') }}" class="{{ request()->routeIs('places.nearby') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('places.nearby')) aria-current="page" @endif>Nearby</a>
+                            <a href="{{ route('places.create') }}" class="{{ request()->routeIs('places.create') ? 'btn-primary' : 'btn-secondary' }}" @if (request()->routeIs('places.create')) aria-current="page" @endif>Add</a>
                         @else
                             <a href="{{ route('auth.google.redirect') }}" class="btn-primary">Get Started</a>
                         @endauth
@@ -55,7 +55,7 @@
                 </main>
 
                 <footer class="theme-border mt-8 border-t py-6 text-center text-xs uppercase tracking-[0.25em] text-muted">
-                    Capture the places worth revisiting.
+                    Recall places through time and space.
                 </footer>
             </div>
         </div>

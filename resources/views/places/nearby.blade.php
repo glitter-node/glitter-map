@@ -1,6 +1,6 @@
-<x-layouts.app title="Nearby">
+<x-layouts.app title="Nearby Memories">
     <section
-        x-data="window.restaurantMapPage({
+        x-data="window.placeMapPage({
             nearbyApiUrl: @js($nearbyApiUrl),
         })"
         class="space-y-4"
@@ -8,14 +8,14 @@
         <section class="panel space-y-6 p-4 text-center sm:p-6">
             <div class="space-y-3">
                 <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">Nearby</p>
-                <h2 class="text-display text-2xl font-extrabold sm:text-3xl">Use your location to see saved restaurants nearby.</h2>
-                <p class="text-body mx-auto max-w-2xl text-sm">Press the button to find the closest places you have already saved.</p>
+                <h2 class="text-display text-2xl font-extrabold sm:text-3xl">Use your location to recall nearby spatial memories.</h2>
+                <p class="text-body mx-auto max-w-2xl text-sm">Press the button to surface saved places around your current position.</p>
             </div>
 
             <div class="flex justify-center">
                 <button type="button" class="btn-primary" @click="locateUser()" :disabled="nearbyLoading">
                     <span x-show="!nearbyLoading">Use current location</span>
-                    <span x-show="nearbyLoading" x-cloak>Finding nearby restaurants...</span>
+                    <span x-show="nearbyLoading" x-cloak>Finding nearby places...</span>
                 </button>
             </div>
 
@@ -23,14 +23,14 @@
                 <template x-if="nearbyState === 'idle'">
                     <div class="surface-subtle rounded-3xl p-8 text-center">
                         <p class="text-display text-lg font-semibold">Press “Use current location” to begin.</p>
-                        <p class="text-body mt-2 text-sm">The results list will update here after location access is granted.</p>
+                        <p class="text-body mt-2 text-sm">Nearby memories will appear here after location access is granted.</p>
                     </div>
                 </template>
 
                 <template x-if="nearbyState === 'loading'">
                     <div class="surface-subtle rounded-3xl p-8 text-center">
                         <p class="text-display text-lg font-semibold">Checking your location...</p>
-                        <p class="text-body mt-2 text-sm">Once location access succeeds, your closest saved restaurants will appear here.</p>
+                        <p class="text-body mt-2 text-sm">Once location access succeeds, your closest saved memories will appear here.</p>
                     </div>
                 </template>
 
@@ -43,8 +43,8 @@
 
                 <template x-if="nearbyState === 'empty'">
                     <div class="surface-subtle rounded-3xl p-8 text-center">
-                        <p class="text-display text-lg font-semibold">No nearby saved restaurants found.</p>
-                        <p class="text-body mt-2 text-sm">Your location worked, but none of your saved places are close to you right now.</p>
+                        <p class="text-display text-lg font-semibold">No nearby saved places found.</p>
+                        <p class="text-body mt-2 text-sm">Your location worked, but none of your logged places are close right now.</p>
                     </div>
                 </template>
 
@@ -57,16 +57,17 @@
                         </div>
 
                         <div class="grid gap-3">
-                            <template x-for="restaurant in nearbyRestaurants" :key="restaurant.id">
-                                <a :href="restaurant.show_url" class="surface-elevated rounded-2xl px-4 py-3 transition">
+                            <template x-for="place in nearbyPlaces" :key="place.id">
+                                <a :href="place.show_url" class="surface-elevated rounded-2xl px-4 py-3 transition">
                                     <div class="flex items-start justify-between gap-4">
                                         <div class="min-w-0">
-                                            <p class="text-display truncate font-semibold" x-text="restaurant.name"></p>
-                                            <p class="text-body mt-1 truncate text-sm" x-text="restaurant.address"></p>
+                                            <p class="text-display truncate font-semibold" x-text="place.name"></p>
+                                            <p class="text-body mt-1 truncate text-sm" x-text="place.address"></p>
+                                            <p class="text-body mt-2 line-clamp-2 text-sm" x-text="place.context"></p>
                                         </div>
                                         <div class="shrink-0 text-right">
-                                            <p class="eyebrow text-sm font-semibold" x-text="`${restaurant.distance_km} km`"></p>
-                                            <p class="text-muted mt-1 text-xs uppercase tracking-[0.2em]" x-text="restaurant.category"></p>
+                                            <p class="eyebrow text-sm font-semibold" x-text="`${place.distance_km} km`"></p>
+                                            <p class="text-muted mt-1 text-xs uppercase tracking-[0.2em]" x-text="`${place.impression}/5 impression`"></p>
                                         </div>
                                     </div>
                                 </a>

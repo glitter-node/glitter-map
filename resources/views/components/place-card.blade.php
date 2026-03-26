@@ -1,15 +1,15 @@
 @props([
-    'restaurant',
+    'place',
     'priority' => false,
 ])
 
 <article class="panel overflow-hidden">
-    <a href="{{ route('restaurants.show', $restaurant) }}" class="block">
+    <a href="{{ route('places.show', $place) }}" class="block">
         <div class="media-surface aspect-[4/3] overflow-hidden">
-            @if ($restaurant->image_path)
+            @if ($place->image_path)
                 <img
-                    src="{{ asset('storage/' . $restaurant->image_path) }}"
-                    alt="{{ $restaurant->name }}"
+                    src="{{ asset('storage/' . $place->image_path) }}"
+                    alt="{{ $place->name }}"
                     loading="{{ $priority ? 'eager' : 'lazy' }}"
                     fetchpriority="{{ $priority ? 'high' : 'auto' }}"
                     width="400"
@@ -26,27 +26,29 @@
         <div class="space-y-4 p-3 sm:p-5">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-0">
                 <div class="min-w-0">
-                    <h2 class="text-display truncate text-lg font-bold">{{ $restaurant->name }}</h2>
-                    <p class="text-body mt-1 text-sm">{{ $restaurant->address }}</p>
+                    <h2 class="text-display truncate text-lg font-bold">{{ $place->name }}</h2>
+                    <p class="text-body mt-1 text-sm">{{ $place->address }}</p>
                 </div>
-                <span class="badge badge-accent">{{ $restaurant->category_label }}</span>
+                @if ($place->revisit_intention)
+                    <span class="badge badge-success">Return</span>
+                @endif
             </div>
 
             <div class="text-body flex items-center gap-3 text-sm">
-                <div class="rating-active flex items-center gap-1">
-                    @php($filledStars = (int) round((float) $restaurant->rating))
+                <div class="impression-active flex items-center gap-1">
+                    @php($filledStars = (int) round((float) $place->impression))
                     @for ($star = 1; $star <= 5; $star++)
-                        <span class="{{ $star <= $filledStars ? 'rating-active' : 'rating-inactive' }}">★</span>
+                        <span class="{{ $star <= $filledStars ? 'impression-active' : 'impression-inactive' }}">★</span>
                     @endfor
                 </div>
-                <span class="font-semibold">{{ number_format((float) $restaurant->rating, 1) }}</span>
+                <span class="font-semibold">{{ number_format((float) $place->impression, 1) }}</span>
             </div>
 
+            <p class="text-body line-clamp-2 text-sm">{{ $place->context }}</p>
+
             <div class="text-body flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-0">
-                <span>{{ optional($restaurant->visited_at)->format('M d, Y') ?? 'Not recorded' }}</span>
-                @if ($restaurant->is_revisit)
-                    <span class="badge badge-success">Revisit</span>
-                @endif
+                <span>{{ optional($place->experienced_at)->format('M d, Y') ?? 'Not recorded' }}</span>
+                <span>{{ ! is_null($place->latitude) && ! is_null($place->longitude) ? 'Mapped' : 'Unmapped' }}</span>
             </div>
         </div>
     </a>

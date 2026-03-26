@@ -1,9 +1,8 @@
-<x-layouts.app title="Restaurant Map">
+<x-layouts.app title="Memory Map">
     <section
-        x-data="window.restaurantMapPage({
+        x-data="window.placeMapPage({
             mapApiUrl: @js($mapApiUrl),
             filters: @js([
-                'category' => $filters['category'],
                 'search' => $filters['search'],
                 'sort' => 'latest',
             ]),
@@ -14,10 +13,10 @@
         <section class="panel space-y-3 p-3 sm:p-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p class="eyebrow text-xs font-semibold uppercase tracking-[0.35em]">Map</p>
-                <a href="{{ route('restaurants.create') }}" class="btn-primary">Add restaurant</a>
+                <a href="{{ route('places.create') }}" class="btn-primary">Add memory</a>
             </div>
 
-            <form action="{{ route('restaurants.map') }}" method="GET" class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_220px]">
+            <form action="{{ route('places.map') }}" method="GET" class="grid gap-3">
                 <div>
                     <label for="map-search" class="label">Search</label>
                     <input
@@ -26,19 +25,9 @@
                         type="search"
                         class="input"
                         value="{{ $filters['search'] }}"
-                        placeholder="Search name or address"
+                        placeholder="Search place, area, context, or memory note"
                         x-on:input.debounce.400ms="$el.form.requestSubmit()"
                     >
-                </div>
-
-                <div>
-                    <label for="map-category" class="label">Category</label>
-                    <select id="map-category" name="category" class="input" x-on:change="$el.form.requestSubmit()">
-                        <option value="">All categories</option>
-                        @foreach ($categories as $value => $label)
-                            <option value="{{ $value }}" @selected($filters['category'] === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
                 </div>
             </form>
 
@@ -48,7 +37,7 @@
                     @foreach ($activeFilters as $filter)
                         <span class="badge badge-accent">{{ $filter['label'] }}: {{ $filter['value'] }}</span>
                     @endforeach
-                    <a href="{{ route('restaurants.map') }}" class="btn-secondary text-sm">Clear</a>
+                    <a href="{{ route('places.map') }}" class="btn-secondary text-sm">Clear</a>
                 </div>
             @endif
         </section>
@@ -57,13 +46,13 @@
             <div class="relative">
                 <div class="pointer-events-none absolute left-3 top-3 z-[500]">
                     <div class="panel px-3 py-2 text-xs uppercase tracking-[0.2em]">
-                        <p class="text-muted">Visible markers only</p>
+                        <p class="text-muted">Visible memories</p>
                         <p class="text-display mt-1 font-bold" x-show="mapLoading" x-cloak>Loading markers</p>
-                        <p class="text-display mt-1 font-bold" x-show="!mapLoading" x-text="`${markers.length} markers loaded`"></p>
+                        <p class="text-display mt-1 font-bold" x-show="!mapLoading" x-text="`${markers.length} memories loaded`"></p>
                     </div>
                 </div>
 
-                <div id="restaurants-index-map" class="map-frame h-[620px] overflow-hidden rounded-3xl"></div>
+                <div id="places-index-map" class="map-frame h-[620px] overflow-hidden rounded-3xl"></div>
             </div>
 
             <template x-if="mapError">

@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('restaurants', function (Blueprint $table) {
+        Schema::create('places', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('address');
-            $table->enum('category', ['korean', 'chinese', 'japanese', 'western', 'cafe', 'other'])->index();
-            $table->decimal('rating', 2, 1)->index();
-            $table->date('visited_at')->index();
-            $table->text('memo')->nullable();
-            $table->boolean('is_revisit')->default(false);
+            $table->text('context');
+            $table->decimal('impression', 2, 1)->index();
+            $table->date('experienced_at')->index();
+            $table->text('memory_note')->nullable();
+            $table->boolean('revisit_intention')->default(false);
             $table->string('image_path')->nullable();
             $table->timestamps();
         });
@@ -24,6 +24,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('restaurants');
+        Schema::dropIfExists('places');
     }
 };

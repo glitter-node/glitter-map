@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Restaurant;
+use App\Models\Place;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
-class RestaurantGeocodingService
+class PlaceGeocodingService
 {
     public function geocode(string $address): ?array
     {
@@ -27,7 +27,7 @@ class RestaurantGeocodingService
             ];
         }
 
-        $cached = Restaurant::query()
+        $cached = Place::query()
             ->hasLocation()
             ->where('address', $normalizedAddress)
             ->first(['latitude', 'longitude']);
@@ -45,7 +45,7 @@ class RestaurantGeocodingService
 
         $response = Http::acceptJson()
             ->withHeaders([
-                'User-Agent' => config('app.name', 'local-restaurant-diary').'/1.0 ('.config('app.url', 'http://localhost').')',
+                'User-Agent' => config('app.name', 'local-place-diary').'/1.0 ('.config('app.url', 'http://localhost').')',
                 'Referer' => config('app.url', 'http://localhost'),
             ])
             ->timeout(8)
