@@ -141,7 +141,7 @@ window.restaurantMapPage = function (config = {}) {
             this.mapError = ''
 
             try {
-                const response = await window.axios.get(`${this.mapApiUrl}?${params.toString()}`)
+                const response = await window.axios.get('/api/restaurants/map', { params, withCredentials: true })
                 const markers = Array.isArray(response.data?.data) ? response.data.data : []
                 this.renderMarkers(markers)
             } catch {
