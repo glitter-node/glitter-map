@@ -4,17 +4,19 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 
-delete L.Icon.Default.prototype._getIconUrl
-
-L.Icon.Default.mergeOptions({
+const DefaultIcon = L.icon({
     iconRetinaUrl: markerIcon2x,
     iconUrl: markerIcon,
     shadowUrl: markerShadow,
 })
 
+L.Marker.prototype.options.icon = DefaultIcon
+
 const DEFAULT_CENTER = { lat: 37.5665, lng: 126.9780 }
 const DEFAULT_ZOOM = 13
 const MAP_REQUEST_DEBOUNCE_MS = 250
+const SHOW_MAP_POLL_INTERVAL_MS = 2000
+const SHOW_MAP_POLL_TIMEOUT_MS = 60000
 
 const coerceNumber = (value) => {
     if (value === null || value === undefined || value === '') return null
@@ -53,6 +55,59 @@ const parseMapConfig = (value) => {
     } catch {
         return null
     }
+}
+
+const fetchShowMapLocation = async (url) => {
+    if (!url || !window.axios) return null
+
+    const response = await window.axios.get(url, {
+        withCredentials: true,
+    })
+
+    return response.data ?? null
+}
+
+const startShowMapPolling = (element, config) => {
+    const pollUrl = config?.pollUrl
+    if (!pollUrl || element.dataset.polling === 'true' || element._restaurantMap) return
+
+    element.dataset.polling = 'true'
+    const startedAt = Date.now()
+
+    const poll = async () => {
+        if (element._restaurantMap) return
+
+        if (Date.now() - startedAt >= SHOW_MAP_POLL_TIMEOUT_MS) {
+            delete element.dataset.polling
+            return
+        }
+
+        try {
+            const data = await fetchShowMapLocation(pollUrl)
+            const latitude = coerceNumber(data?.latitude)
+            const longitude = coerceNumber(data?.longitude)
+
+            if (latitude !== null && longitude !== null) {
+                config.marker = {
+                    ...config.marker,
+                    latitude,
+                    longitude,
+                    label: data?.name ?? config.marker?.label ?? '',
+                }
+                element.dataset.mapConfig = JSON.stringify(config)
+                element.className = 'map-frame mt-6 h-80 overflow-hidden rounded-3xl'
+                element.textContent = ''
+                delete element.dataset.polling
+                initializeShowMap()
+                return
+            }
+        } catch {
+        }
+
+        window.setTimeout(poll, SHOW_MAP_POLL_INTERVAL_MS)
+    }
+
+    window.setTimeout(poll, SHOW_MAP_POLL_INTERVAL_MS)
 }
 
 const debounce = (callback, delay) => {
@@ -247,7 +302,10 @@ const initializeShowMap = () => {
     const latitude = coerceNumber(marker?.latitude)
     const longitude = coerceNumber(marker?.longitude)
 
-    if (latitude === null || longitude === null) return
+    if (latitude === null || longitude === null) {
+        startShowMapPolling(element, config ?? {})
+        return
+    }
 
     const zoom = coerceNumber(config?.zoom) ?? 16
     const map = buildMap(element, { lat: latitude, lng: longitude }, zoom)

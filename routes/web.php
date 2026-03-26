@@ -29,6 +29,8 @@ Route::post('/auth/google/one-tap', [GoogleAuthController::class, 'oneTap'])
 Route::middleware('auth')->group(function () {
     Route::get('/restaurants/map', [RestaurantController::class, 'map'])
         ->name('restaurants.map');
+    Route::get('/restaurants/{restaurant}/location', [RestaurantController::class, 'location'])
+        ->name('restaurants.location');
     Route::get('/insights', [RestaurantController::class, 'insights'])
         ->name('restaurants.insights');
     Route::get('/nearby', [RestaurantController::class, 'nearby'])

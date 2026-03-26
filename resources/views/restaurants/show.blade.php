@@ -6,6 +6,7 @@
             'label' => $restaurant->name,
         ],
         'zoom' => 16,
+        'pollUrl' => route('restaurants.location', $restaurant),
     ];
 @endphp
 
@@ -58,9 +59,9 @@
                         @if (! is_null($restaurant->latitude) && ! is_null($restaurant->longitude))
                             {{ number_format($restaurant->latitude, 7) }}, {{ number_format($restaurant->longitude, 7) }}
                         @elseif ($restaurant->geocode_status === 'pending')
-                            위치 처리 중
+                            Location is being processed
                         @elseif ($restaurant->geocode_status === 'failed')
-                            위치 처리 실패
+                            Location processing failed
                         @else
                             Location not selected.
                         @endif
@@ -83,14 +84,18 @@
                         data-map-config='@json($showMapConfig)'
                     ></div>
                 @elseif ($restaurant->geocode_status === 'pending')
-                    <div class="status-warning mt-6 rounded-3xl border-dashed p-10 text-center">
-                        <p class="text-lg font-semibold">위치 처리 중</p>
-                        <p class="mt-2 text-sm">좌표가 확인되는 즉시 지도에 자동 반영됩니다.</p>
+                    <div
+                        id="restaurant-show-map"
+                        class="status-warning mt-6 h-80 rounded-3xl border-dashed p-10 text-center"
+                        data-map-config='@json($showMapConfig)'
+                    >
+                        <p class="text-lg font-semibold">Location is being processed</p>
+                        <p class="mt-2 text-sm">The map will appear automatically when coordinates are ready.</p>
                     </div>
                 @elseif ($restaurant->geocode_status === 'failed')
                     <div class="status-danger mt-6 rounded-3xl border-dashed p-10 text-center">
-                        <p class="text-lg font-semibold">위치 처리 실패</p>
-                        <p class="mt-2 text-sm">관리자가 재시도하거나 수정 화면에서 좌표를 직접 지정할 수 있습니다.</p>
+                        <p class="text-lg font-semibold">Location processing failed</p>
+                        <p class="mt-2 text-sm">Try again later or edit this restaurant to set coordinates manually.</p>
                     </div>
                 @else
                     <div class="surface-subtle mt-6 rounded-3xl border-dashed p-10 text-center">
