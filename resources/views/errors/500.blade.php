@@ -11,7 +11,7 @@
 
             <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <a href="{{ route('restaurants.index') }}" class="btn-primary">Back to list</a>
-                <button type="button" class="btn-secondary" onclick="window.location.reload()">Retry</button>
+                <button type="button" class="btn-secondary js-reload-page">Retry</button>
             </div>
         </div>
     </section>

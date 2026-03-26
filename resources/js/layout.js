@@ -13,4 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     applyTheme(storedTheme);
     document.documentElement.classList.add('js-ready');
+
+    document.querySelectorAll('.js-reload-page').forEach((element) => {
+        element.addEventListener('click', () => {
+            window.location.reload();
+        });
+    });
 });
