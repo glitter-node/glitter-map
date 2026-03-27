@@ -1,3 +1,4 @@
+import Alpine from 'alpinejs'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
@@ -118,179 +119,198 @@ const debounce = (callback, delay) => {
     }
 }
 
-window.placeMapPage = function (config = {}) {
-    return {
-        mapApiUrl: config.mapApiUrl ?? '',
-        nearbyApiUrl: config.nearbyApiUrl ?? '',
-        filters: config.filters ?? {},
-        mapMode: 'list',
-        map: null,
-        markerLayer: null,
-        markers: [],
-        mapLoading: false,
-        mapError: null,
-        nearbyLoading: false,
-        nearbyState: 'idle',
-        nearbyPlaces: [],
-        nearbyError: null,
-        userLocation: null,
-        hasFitBounds: false,
+const createPlaceMapPage = (config = {}) => ({
+    mapApiUrl: config.mapApiUrl ?? '/api/places/map',
+    nearbyApiUrl: config.nearbyApiUrl ?? '',
+    filters: config.filters ?? {},
+    mapMode: config.mapMode ?? 'map',
+    mapElementId: config.mapElementId ?? 'places-index-map',
+    map: null,
+    markerLayer: null,
+    markers: [],
+    mapLoading: false,
+    mapError: null,
+    nearbyLoading: false,
+    nearbyState: 'idle',
+    nearbyPlaces: [],
+    nearbyError: null,
+    userLocation: null,
+    hasFitBounds: false,
 
-        init() {
-            this.$nextTick(() => {
-                this.initializeIndexMap()
+    init() {
+        this.$nextTick(() => {
+            this.initializeIndexMap()
+        })
+    },
+
+    setMapMode(mode) {
+        this.mapMode = mode
+
+        if (mode !== 'map') return
+
+        this.$nextTick(() => {
+            this.initializeIndexMap()
+            window.requestAnimationFrame(() => {
+                this.map?.invalidateSize()
             })
-        },
+        })
+    },
 
-        setMapMode(mode) {
-            this.mapMode = mode
+    initializeIndexMap() {
+        const element = document.getElementById(this.mapElementId)
+            || document.getElementById('places-index-map')
+            || document.getElementById('place-map')
+            || document.querySelector('[data-place-map]')
 
-            if (mode !== 'map') return
+        if (!element) {
+            this.mapError = 'Map container could not be found.'
+            return
+        }
 
-            this.$nextTick(() => {
-                this.initializeIndexMap()
-                window.requestAnimationFrame(() => {
-                    this.map?.invalidateSize()
-                })
-            })
-        },
+        if (this.map) {
+            this.map.invalidateSize()
+            return
+        }
 
-        initializeIndexMap() {
-            const element = document.getElementById('places-index-map')
-            if (!element) return
+        this.map = buildMap(element, DEFAULT_CENTER, DEFAULT_ZOOM)
 
-            if (this.map) {
-                this.map.invalidateSize()
-                return
-            }
+        this.markerLayer = L.layerGroup()
+        this.markerLayer.addTo(this.map)
 
-            this.map = buildMap(element, DEFAULT_CENTER, DEFAULT_ZOOM)
-
-            this.markerLayer = L.layerGroup()
-            this.markerLayer.addTo(this.map)
-
-            const loadMarkers = debounce(() => {
-                this.fetchMarkers()
-            }, MAP_REQUEST_DEBOUNCE_MS)
-
-            this.map.on('moveend', loadMarkers)
+        const loadMarkers = debounce(() => {
             this.fetchMarkers()
-        },
+        }, MAP_REQUEST_DEBOUNCE_MS)
 
-        async fetchMarkers() {
-            if (!this.map || !this.mapApiUrl || !window.axios) return
+        this.map.on('moveend', loadMarkers)
+        this.fetchMarkers()
+    },
 
-            const bounds = this.map.getBounds()
-            const params = new URLSearchParams({
-                south: String(bounds.getSouth()),
-                west: String(bounds.getWest()),
-                north: String(bounds.getNorth()),
-                east: String(bounds.getEast()),
-                zoom: String(this.map.getZoom()),
+    async fetchMarkers() {
+        if (!this.map || !this.mapApiUrl || !window.axios) return
+
+        const bounds = this.map.getBounds()
+        const params = new URLSearchParams({
+            south: String(bounds.getSouth()),
+            west: String(bounds.getWest()),
+            north: String(bounds.getNorth()),
+            east: String(bounds.getEast()),
+            zoom: String(this.map.getZoom()),
+        })
+
+        if (this.filters.search) params.set('search', this.filters.search)
+
+        this.mapLoading = true
+        this.mapError = null
+
+        try {
+            const response = await window.axios.get(this.mapApiUrl, {
+                params,
+                withCredentials: true,
             })
+            const markers = Array.isArray(response.data?.data) ? response.data.data : []
+            this.renderMarkers(markers)
+        } catch {
+            this.mapError = 'Map markers could not be loaded. Check your connection and try again.'
+            this.markers = []
+        } finally {
+            this.mapLoading = false
+        }
+    },
 
-            if (this.filters.search) params.set('search', this.filters.search)
+    renderMarkers(markers) {
+        this.markers = Array.isArray(markers) ? markers : []
 
-            this.mapLoading = true
-            this.mapError = ''
+        if (!this.markerLayer) return
 
-            try {
-                const response = await window.axios.get('/api/places/map', { params, withCredentials: true })
-                const markers = Array.isArray(response.data?.data) ? response.data.data : []
-                this.renderMarkers(markers)
-            } catch {
-                this.mapError = 'Map markers could not be loaded. Check your connection and try again.'
-            } finally {
-                this.mapLoading = false
+        this.markerLayer.clearLayers()
+
+        const bounds = L.latLngBounds([])
+
+        this.markers.forEach((marker) => {
+            const latitude = coerceNumber(marker?.latitude)
+            const longitude = coerceNumber(marker?.longitude)
+
+            if (latitude === null || longitude === null) return
+
+            const leafletMarker = L.marker([latitude, longitude]).bindPopup(
+                `<strong>${escapeHtml(marker?.name)}</strong>`
+            )
+
+            this.markerLayer.addLayer(leafletMarker)
+            bounds.extend([latitude, longitude])
+        })
+
+        if (!this.hasFitBounds && bounds.isValid()) {
+            this.hasFitBounds = true
+
+            if (this.markers.length === 1) {
+                this.map.setView(bounds.getCenter(), 15)
+            } else {
+                this.map.fitBounds(bounds.pad(0.2))
             }
-        },
+        }
+    },
 
-        renderMarkers(markers) {
-            this.markers = markers
-
-            if (!this.markerLayer) return
-
-            this.markerLayer.clearLayers()
-
-            const bounds = L.latLngBounds([])
-
-            markers.forEach((marker) => {
-                if (coerceNumber(marker.latitude) === null || coerceNumber(marker.longitude) === null) return
-
-                const leafletMarker = L.marker([marker.latitude, marker.longitude]).bindPopup(
-                    `<strong>${escapeHtml(marker.name)}</strong>`
-                )
-
-                this.markerLayer.addLayer(leafletMarker)
-                bounds.extend([marker.latitude, marker.longitude])
-            })
-
-            if (!this.hasFitBounds && bounds.isValid()) {
-                this.hasFitBounds = true
-
-                if (markers.length === 1) {
-                    this.map.setView(bounds.getCenter(), 15)
-                } else {
-                    this.map.fitBounds(bounds.pad(0.2))
-                }
-            }
-        },
-
-        async locateUser() {
-            if (!navigator.geolocation || !this.nearbyApiUrl || !window.axios) {
-                this.nearbyPlaces = []
-                this.userLocation = null
-                this.nearbyError = 'This device or browser does not support location access.'
-                this.nearbyState = 'error'
-                return
-            }
-
+    async locateUser() {
+        if (!navigator.geolocation || !this.nearbyApiUrl || !window.axios) {
             this.nearbyPlaces = []
             this.userLocation = null
-            this.nearbyLoading = true
-            this.nearbyError = ''
-            this.nearbyState = 'loading'
+            this.nearbyError = 'This device or browser does not support location access.'
+            this.nearbyState = 'error'
+            return
+        }
 
-            navigator.geolocation.getCurrentPosition(
-                async ({ coords }) => {
-                    this.userLocation = {
-                        latitude: coords.latitude,
-                        longitude: coords.longitude,
-                    }
+        this.nearbyPlaces = []
+        this.userLocation = null
+        this.nearbyLoading = true
+        this.nearbyError = ''
+        this.nearbyState = 'loading'
 
-                    try {
-                        const response = await window.axios.get(this.nearbyApiUrl, {
-                            params: {
-                                latitude: coords.latitude,
-                                longitude: coords.longitude,
-                            },
-                        })
+        navigator.geolocation.getCurrentPosition(
+            async ({ coords }) => {
+                this.userLocation = {
+                    latitude: coords.latitude,
+                    longitude: coords.longitude,
+                }
 
-                        this.nearbyPlaces = Array.isArray(response.data?.data) ? response.data.data : []
-                        if (!this.nearbyPlaces.length) {
-                            this.nearbyState = 'empty'
-                        } else {
-                            this.nearbyState = 'success'
-                        }
-                    } catch {
-                        this.nearbyError = 'Nearby places could not be loaded. Try again in a moment.'
-                        this.nearbyState = 'error'
-                    } finally {
-                        this.nearbyLoading = false
-                    }
-                },
-                (error) => {
-                    this.nearbyLoading = false
-                    this.nearbyError = error.code === error.PERMISSION_DENIED
-                        ? 'Location permission was denied. Allow browser location access, then press “Use current location” again.'
-                        : 'Your location could not be determined. Check location settings and try again.'
+                try {
+                    const response = await window.axios.get(this.nearbyApiUrl, {
+                        params: {
+                            latitude: coords.latitude,
+                            longitude: coords.longitude,
+                        },
+                    })
+
+                    this.nearbyPlaces = Array.isArray(response.data?.data) ? response.data.data : []
+                    this.nearbyState = this.nearbyPlaces.length ? 'success' : 'empty'
+                } catch {
+                    this.nearbyError = 'Nearby places could not be loaded. Try again in a moment.'
                     this.nearbyState = 'error'
-                },
-                { enableHighAccuracy: true, timeout: 5000 }
-            )
-        },
-    }
-}
+                } finally {
+                    this.nearbyLoading = false
+                }
+            },
+            (error) => {
+                this.nearbyLoading = false
+                this.nearbyError = error.code === error.PERMISSION_DENIED
+                    ? 'Location permission was denied. Allow browser location access, then press "Use current location" again.'
+                    : 'Your location could not be determined. Check location settings and try again.'
+                this.nearbyState = 'error'
+            },
+            { enableHighAccuracy: true, timeout: 5000 }
+        )
+    },
+})
+
+window.placeMapPage = createPlaceMapPage
+window.mapPage = createPlaceMapPage
+window.memoryMapPage = createPlaceMapPage
+
+document.addEventListener('alpine:init', () => {
+    Alpine.data('placeMapPage', createPlaceMapPage)
+    Alpine.data('mapPage', createPlaceMapPage)
+    Alpine.data('memoryMapPage', createPlaceMapPage)
+})
 
 const initializeShowMap = () => {
     const element = document.getElementById('place-show-map')
